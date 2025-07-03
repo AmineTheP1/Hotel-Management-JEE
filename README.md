@@ -6,6 +6,19 @@ This is a Java EE (JEE) multi-module project for hotel management, built using M
 - **hotels-ejb**: Contains the business logic and entity beans (EJB module).
 - **hotels-web**: Web application module (servlets, JSPs, etc.).
 
+![Signup](https://github.com/user-attachments/assets/d5ce6d27-d7bd-4627-b1a6-6ec8feda2091)
+
+![Home Screen Hotel Management](https://github.com/user-attachments/assets/b4c1981a-6e02-420d-8ebc-90965cf1adc5)
+
+![Hotels](https://github.com/user-attachments/assets/44a3569b-c4df-4eb4-96f6-3b7b2a058863)
+
+![Singup Hotel Manager](https://github.com/user-attachments/assets/0bfc841a-8457-4ecf-9c58-ba6119c46451)
+
+![Login Hotel Manager](https://github.com/user-attachments/assets/c8535d0b-a592-4ce4-a1e9-ed6025a86a61)
+
+![Dashboard Manager](https://github.com/user-attachments/assets/18b39958-f5b6-4345-bad0-8948a77af8bc)
+
+
 ## Project Structure
 
 ```
