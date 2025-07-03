@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZAIRTAM - Hotels Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .hotel-card {
+            transition: all 0.3s ease;
+        }
+        
+        .hotel-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar {
+            height: calc(100vh - 64px);
+            position: sticky;
+            top: 64px;
+        }
+        
+        @media (max-width: 1024px) {
+            .sidebar {
+                position: fixed;
+                left: -100%;
+                top: 64px;
+                bottom: 0;
+                width: 250px;
+                z-index: 40;
+                transition: left 0.3s ease;
+            }
+            
+            .sidebar.open {
+                left: 0;
+            }
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .status-active {
+            background-color: #D1FAE5;
+            color: #065F46;
+        }
+        
+        .status-pending {
+            background-color: #FEF3C7;
+            color: #92400E;
+        }
+        
+        .status-inactive {
+            background-color: #FEE2E2;
+            color: #B91C1C;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <button id="sidebar-toggle" class="lg:hidden mr-4 text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                    <a href="index.html" class="flex items-center">
+                        <i class="fas fa-hotel text-blue-600 text-2xl mr-2"></i>
+                        <span class="text-xl font-bold text-gray-800">ZAIRTAM</span>
+                    </a>
+                </div>
+                
+                <!-- Search -->
+                <div class="hidden md:flex items-center flex-1 max-w-md mx-8">
+                    <div class="w-full relative">
+                        <input type="text" placeholder="Search for hotels by name, location..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                    </div>
+                </div>
+                
+                <!-- Right Nav Items -->
+                <div class="flex items-center space-x-4">
+                    <button class="text-gray-500 hover:text-gray-700 relative">
+                        <i class="fas fa-bell text-xl"></i>
+                        <span class="absolute top-0 right-0 h-4 w-4 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">5</span>
+                    </button>
+                    
+                    <div class="relative">
+                        <button class="flex items-center text-gray-800 hover:text-blue-600">
+                            <img src="https://randomuser.me/api/portraits/women/28.jpg" alt="Profile" class="h-8 w-8 rounded-full object-cover">
+                            <span class="ml-2 hidden md:block">Admin Smith</span>
+                            <i class="fas fa-chevron-down ml-1 text-xs hidden md:block"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside class="bg-white w-64 shadow-sm sidebar" id="sidebar">
+            <div class="p-4">
+                <div class="mb-6">
+                    <h3 class="text-xs uppercase text-gray-500 font-semibold tracking-wider">Main</h3>
+                    <ul class="mt-3 space-y-1">
+                        <li>
+                            <a href="hotel-global-admin-dashboard.html" class="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                                <i class="fas fa-tachometer-alt w-5 text-center"></i>
+                                <span class="ml-2">Dashboard</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="hotels.html" class="flex items-center px-3 py-2 text-blue-600 bg-blue-50 rounded-md">
+                                <i class="fas fa-hotel w-5 text-center"></i>
+                                <span class="ml-2">Hotels</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                                <i class="fas fa-users w-5 text-center"></i>
+                                <span class="ml-2">Users</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                                <i class="fas fa-calendar-alt w-5 text-center"></i>
+                                <span class="ml-2">Bookings</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="mb-6">
+                    <h3 class="text-xs uppercase text-gray-500 font-semibold tracking-wider">Analytics</h3>
+                    <ul class="mt-3 space-y-1">
+                        <li>
+                            <a href="#" class="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                                <i class="fas fa-chart-line w-5 text-center"></i>
+                                <span class="ml-2">Reports</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                                <i class="fas fa-money-bill-wave w-5 text-center"></i>
+                                <span class="ml-2">Revenue</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                                <i class="fas fa-chart-pie w-5 text-center"></i>
+                                <span class="ml-2">Statistics</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="mb-6">
+                    <h3 class="text-xs uppercase text-gray-500 font-semibold tracking-wider">Administration</h3>
+                    <ul class="mt-3 space-y-1">
+                        <li>
+                            <a href="#" class="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                                <i class="fas fa-user-shield w-5 text-center"></i>
+                                <span class="ml-2">Admin Users</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                                <i class="fas fa-cog w-5 text-center"></i>
+                                <span class="ml-2">Settings</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                                <i class="fas fa-bell w-5 text-center"></i>
+                                <span class="ml-2">Notifications</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-xs uppercase text-gray-500 font-semibold tracking-wider">Support</h3>
+                    <ul class="mt-3 space-y-1">
+                        <li>
+                            <a href="#" class="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                                <i class="fas fa-question-circle w-5 text-center"></i>
+                                <span class="ml-2">Help Center</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                                <i class="fas fa-headset w-5 text-center"></i>
+                                <span class="ml-2">Contact Support</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6">
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800">Hotels Management</h1>
+                    <p class="text-gray-600">Manage all registered hotels in the system</p>
+                </div>
+                <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200 flex items-center">
+                    <i class="fas fa-plus mr-2"></i> Add New Hotel
+                </button>
+            </div>
+            
+            <!-- Filters Section -->
+            <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+                <div class="flex flex-wrap items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 md:mb-0">Filter Hotels</h3>
+                    
+                    <div class="flex flex-wrap gap-4">
+                        <div class="w-full md:w-auto">
+                            <label for="location-filter" class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                            <select id="location-filter" class="w-full md:w-48 px-3 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                                <option value="all">All Locations</option>
+                                <option value="paris">Paris, France</option>
+                                <option value="london">London, UK</option>
+                                <option value="new-york">New York, USA</option>
+                                <option value="tokyo">Tokyo, Japan</option>
+                                <option value="dubai">Dubai, UAE</option>
+                            </select>
+                        </div>
+                        
+                        <div class="w-full md:w-auto">
+                            <label for="status-filter" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                            <select id="status-filter" class="w-full md:w-48 px-3 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                                <option value="all">All Status</option>
+                                <option value="active">Active</option>
+                                <option value="pending">Pending Approval</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </div>
+                        
+                        <div class="w-full md:w-auto">
+                            <label for="rating-filter" class="block text-sm font-medium text-gray-700 mb-1">Rating</label>
+                            <select id="rating-filter" class="w-full md:w-48 px-3 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                                <option value="all">All Ratings</option>
+                                <option value="5">5 Stars</option>
+                                <option value="4">4 Stars & Up</option>
+                                <option value="3">3 Stars & Up</option>
+                                <option value="2">2 Stars & Up</option>
+                            </select>
+                        </div>
+                        
+                        <div class="w-full md:w-auto flex items-end">
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                                <i class="fas fa-filter mr-1"></i> Apply Filters
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Hotels Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-gray-500 text-sm font-medium">Active Hotels</h3>
+                        <div class="bg-green-100 p-2 rounded-md">
+                            <i class="fas fa-check-circle text-green-600"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-end">
+                        <p class="text-2xl font-bold text-gray-800">36</p>
+                        <p class="text-green-600 text-sm ml-2 mb-1">
+                            <i class="fas fa-arrow-up mr-1"></i>4%
+                        </p>
+                    </div>
+                    <p class="text-gray-500 text-sm mt-1">Compared to last month</p>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-gray-500 text-sm font-medium">Pending Approval</h3>
+                        <div class="bg-yellow-100 p-2 rounded-md">
+                            <i class="fas fa-clock text-yellow-600"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-end">
+                        <p class="text-2xl font-bold text-gray-800">8</p>
+                        <p class="text-red-600 text-sm ml-2 mb-1">
+                            <i class="fas fa-arrow-up mr-1"></i>12%
+                        </p>
+                    </div>
+                    <p class="text-gray-500 text-sm mt-1">Compared to last month</p>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-gray-500 text-sm font-medium">Average Rating</h3>
+                        <div class="bg-blue-100 p-2 rounded-md">
+                            <i class="fas fa-star text-blue-600"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-end">
+                        <p class="text-2xl font-bold text-gray-800">4.6</p>
+                        <p class="text-green-600 text-sm ml-2 mb-1">
+                            <i class="fas fa-arrow-up mr-1"></i>0.2
+                        </p>
+                    </div>
+                    <p class="text-gray-500 text-sm mt-1">Compared to last month</p>
+                </div>
+            </div>
+            
+            <!-- Hotels Table -->
+            <div class="bg-white rounded-lg shadow-sm overflow-hidden mb-8">
+                <div class="p-6 border-b">
+                    <h3 class="text-lg font-semibold text-gray-800">All Hotels</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Hotel
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Location
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Manager
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Rooms
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Rating
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Status
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <!-- Hotel 1 -->
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="h-10 w-10 flex-shrink-0">
+                                            <img class="h-10 w-10 rounded-md object-cover" src="https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="">
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900">Grand Hotel Paris</div>
+                                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">Paris, France</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">Jean Dupont</div>
+                                    <div class="text-sm text-gray-500">jean.dupont@example.com</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    120
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <span class="text-yellow-400 flex">
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star-half-alt"></i>
+                                        </span>
+                                        <span class="ml-1 text-sm text-gray-600">4.8</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="status-badge status-active">Active</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <div class="flex justify-end space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-900">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="text-gray-600 hover:text-gray-900">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="text-red-600 hover:text-red-900">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Hotel 2 -->
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="h-10 w-10 flex-shrink-0">
+                                            <img class="h-10 w-10 rounded-md object-cover" src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="">
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900">Royal London Hotel</div>
+                                            <div class="text-sm text-gray-500">ID: HTL-1002</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">London, UK</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">James Wilson</div>
+                                    <div class="text-sm text-gray-500">james.wilson@example.com</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    95
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <span class="text-yellow-400 flex">
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                        </span>
+                                        <span class="ml-1 text-sm text-gray-600">5.0</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="status-badge status-active">Active</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <div class="flex justify-end space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-900">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="text-gray-600 hover:text-gray-900">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="text-red-600 hover:text-red-900">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Hotel 3 -->
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="h-10 w-10 flex-shrink-0">
+                                            <img class="h-10 w-10 rounded-md object-cover" src="https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="">
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900">Plaza New York</div>
+                                            <div class="text-sm text-gray-500">ID: HTL-1003</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">New York, USA</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">Michael Johnson</div>
+                                    <div class="text-sm text-gray-500">michael.j@example.com</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    150
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <span class="text-yellow-400 flex">
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="far fa-star"></i>
+                                        </span>
+                                        <span class="ml-1 text-sm text-gray-600">4.0</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="status-badge status-active">Active</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <div class="flex justify-end space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-900">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="text-gray-600 hover:text-gray-900">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="text-red-600 hover:text-red-900">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Hotel 4 -->
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="h-10 w-10 flex-shrink-0">
+                                            <img class="h-10 w-10 rounded-md object-cover" src="https://images.unsplash.com/photo-1564501049412-61c2a3083791?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1332&q=80" alt="">
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900">Royal Palace Hotel</div>
+                                            <div class="text-sm text-gray-500">ID: HTL-1004</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">London, UK</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">Elizabeth Taylor</div>
+                                    <div class="text-sm text-gray-500">elizabeth.t@example.com</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    150
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <span class="text-yellow-400 flex">
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star-half-alt"></i>
+                                        </span>
+                                        <span class="ml-1 text-sm text-gray-600">4.7</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="status-badge status-active">Active</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <div class="flex justify-end space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-900">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="text-gray-600 hover:text-gray-900">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="text-red-600 hover:text-red-900">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Hotel 5 -->
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="h-10 w-10 flex-shrink-0">
+                                            <img class="h-10 w-10 rounded-md object-cover" src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="">
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900">Desert Oasis Resort</div>
+                                            <div class="text-sm text-gray-500">ID: HTL-1005</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">Dubai, UAE</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">Ahmed Al-Farsi</div>
+                                    <div class="text-sm text-gray-500">ahmed.f@example.com</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    200
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <span class="text-yellow-400 flex">
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                        </span>
+                                        <span class="ml-1 text-sm text-gray-600">4.9</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="status-badge status-active">Active</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <div class="flex justify-end space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-900">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="text-gray-600 hover:text-gray-900">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="text-red-600 hover:text-red-900">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Hotel 6 -->
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="h-10 w-10 flex-shrink-0">
+                                            <img class="h-10 w-10 rounded-md object-cover" src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1480&q=80" alt="">
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900">Sakura Inn</div>
+                                            <div class="text-sm text-gray-500">ID: HTL-1006</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">Tokyo, Japan</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">Yuki Tanaka</div>
+                                    <div class="text-sm text-gray-500">yuki.t@example.com</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    60
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <span class="text-yellow-400 flex">
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="far fa-star"></i>
+                                        </span>
+                                        <span class="ml-1 text-sm text-gray-600">4.2</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="status-badge status-pending">Pending</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <div class="flex justify-end space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-900">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="text-gray-600 hover:text-gray-900">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="text-red-600 hover:text-red-900">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Hotel 7 -->
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="h-10 w-10 flex-shrink-0">
+                                            <img class="h-10 w-10 rounded-md object-cover" src="https://images.unsplash.com/photo-1561501900-3701fa6a0864?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="">
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900">Mountain View Lodge</div>
+                                            <div class="text-sm text-gray-500">ID: HTL-1007</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">Zurich, Switzerland</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">Hans Mueller</div>
+                                    <div class="text-sm text-gray-500">hans.m@example.com</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    45
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <span class="text-yellow-400 flex">
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star-half-alt"></i>
+                                            <i class="far fa-star"></i>
+                                        </span>
+                                        <span class="ml-1 text-sm text-gray-600">3.5</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="status-badge status-pending">Pending</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <div class="flex justify-end space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-900">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="text-gray-600 hover:text-gray-900">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="text-red-600 hover:text-red-900">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Hotel 8 -->
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="h-10 w-10 flex-shrink-0">
+                                            <img class="h-10 w-10 rounded-md object-cover" src="https://images.unsplash.com/photo-1455587734955-081b22074882?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="">
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900">Sunset Beach Resort</div>
+                                            <div class="text-sm text-gray-500">ID: HTL-1008</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">Cancun, Mexico</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">Carlos Rodriguez</div>
+                                    <div class="text-sm text-gray-500">carlos.r@example.com</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    110
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <span class="text-yellow-400 flex">
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="far fa-star"></i>
+                                        </span>
+                                        <span class="ml-1 text-sm text-gray-600">4.1</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="status-badge status-inactive">Inactive</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <div class="flex justify-end space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-900">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="text-gray-600 hover:text-gray-900">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="text-red-600 hover:text-red-900">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                <div class="px-6 py-4 flex items-center justify-between border-t">
+                    <div class="flex-1 flex justify-between sm:hidden">
+                        <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                            Previous
+                        </a>
+                        <a href="#" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                            Next
+                        </a>
+                    </div>
+                    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                        <div>
+                            <p class="text-sm text-gray-700">
+                                Showing <span class="font-medium">1</span> to <span class="font-medium">8</span> of <span class="font-medium">36</span> results
+                            </p>
+                        </div>
+                        <div>
+                            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                                <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                    <span class="sr-only">Previous</span>
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                                <a href="#" aria-current="page" class="z-10 bg-blue-50 border-blue-500 text-blue-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                                    1
+                                </a>
+                                <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                                    2
+                                </a>
+                                <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                                    3
+                                </a>
+                                <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                                    ...
+                                </span>
+                                <a href="#" class="bg-white border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                                    5
+                                </a>
+                                <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                    <span class="sr-only">Next</span>
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Hotel Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <!-- Hotel Card 1 -->
+                <div class="bg-white rounded-lg shadow-sm overflow-hidden hotel-card">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Hotel" class="w-full h-48 object-cover">
+                        <div class="absolute top-3 right-3">
+                            <span class="status-badge status-active">Active</span>
+                        </div>
+                    </div>
+                    <div class="p-5">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-800">Grand Hotel Paris</h3>
+                                <p class="text-gray-600 text-sm">Paris, France</p>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="text-yellow-400 mr-1"><i class="fas fa-star"></i></span>
+                                <span class="text-gray-700 font-medium">4.5</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center text-sm text-gray-600">
+                            <i class="fas fa-door-open mr-1"></i>
+                            <span>120 Rooms</span>
+                            <span class="mx-2">•</span>
+                            <i class="fas fa-user mr-1"></i>
+                            <span>Jean Dupont</span>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">ID: HTL-1001</div>
+                            <div class="text-sm text-gray-500">Jean.dupont@example.com</div>
+                        </div>
+                        <div class="mt-5 flex justify-between items-center">
+                            <div class="text-sm text-gray-500">
+                                Showing 1 to 10 of 36 entries
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button class="px-3 py-1 border rounded-md text-gray-600 hover:bg-gray-50 disabled:opacity-50" disabled>
+                                    Previous
+                                </button>
+                                <button class="px-3 py-1 border rounded-md bg-blue-600 text-white">
+                                    1
+                                </button>
+                                <button class="px-3 py-1 border rounded-md text-gray-600 hover:bg-gray-50">
+                                    2
+                                </button>
+                                <button class="px-3 py-1 border rounded-md text-gray-600 hover:bg-gray-50">
+                                    3
+                                </button>
+                                <button class="px-3 py-1 border rounded-md text-gray-600 hover:bg-gray-50">
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mt-6 flex justify-between">
+                            <div class="flex space-x-2">
+                                <button class="text-blue-600 hover:text-blue-900">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="text-gray-600 hover:text-gray-900">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="text-red-600 hover:text-red-900">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Sidebar toggle functionality
+        document.getElementById('sidebar-toggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('open');
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            
+            if (!sidebar.contains(event.target) && !sidebarToggle.contains(event.target)) {
+                sidebar.classList.remove('open');
+            }
+        });
+    </script>

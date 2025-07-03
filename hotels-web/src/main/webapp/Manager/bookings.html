@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZAIRTAM - Bookings Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .booking-card {
+            transition: all 0.3s ease;
+        }
+        
+        .booking-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar {
+            height: calc(100vh - 64px);
+            position: sticky;
+            top: 64px;
+        }
+        
+        @media (max-width: 1024px) {
+            .sidebar {
+                position: fixed;
+                left: -100%;
+                top: 64px;
+                bottom: 0;
+                width: 250px;
+                z-index: 40;
+                transition: left 0.3s ease;
+            }
+            
+            .sidebar.open {
+                left: 0;
+            }
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .status-confirmed {
+            background-color: #D1FAE5;
+            color: #065F46;
+        }
+        
+        .status-pending {
+            background-color: #FEF3C7;
+            color: #92400E;
+        }
+        
+        .status-cancelled {
+            background-color: #FEE2E2;
+            color: #B91C1C;
+        }
+        
+        .status-completed {
+            background-color: #E0E7FF;
+            color: #3730A3;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <button id="sidebar-toggle" class="lg:hidden mr-4 text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                    <a href="index.html" class="flex items-center">
+                        <i class="fas fa-hotel text-blue-600 text-2xl mr-2"></i>
+                        <span class="text-xl font-bold text-gray-800">ZAIRTAM</span>
+                    </a>
+                </div>
+                
+                <!-- Search -->
+                <div class="hidden md:flex items-center flex-1 max-w-md mx-8">
+                    <div class="w-full relative">
+                        <input type="text" placeholder="Search for bookings by ID, guest name..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                    </div>
+                </div>
+                
+                <!-- Right Nav Items -->
+                <div class="flex items-center space-x-4">
+                    <button class="text-gray-500 hover:text-gray-700 relative">
+                        <i class="fas fa-bell text-xl"></i>
+                        <span class="absolute top-0 right-0 h-4 w-4 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">5</span>
+                    </button>
+                    
+                    <div class="relative">
+                        <button class="flex items-center text-gray-800 hover:text-blue-600">
+                            <img src="https://randomuser.me/api/portraits/women/28.jpg" alt="Profile" class="h-8 w-8 rounded-full object-cover">
+                            <span class="ml-2 hidden md:block">Admin Smith</span>
+                            <i class="fas fa-chevron-down ml-1 text-xs hidden md:block"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside class="bg-white w-64 shadow-sm sidebar" id="sidebar">
+            <div class="p-4">
+                <div class="mb-6">
+                    <h3 class="text-xs uppercase text-gray-500 font-semibold tracking-wider">Main</h3>
+                    <ul class="mt-3 space-y-1">
+                        <li>
+                            <a href="hotel-global-admin-dashboard.html" class="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                                <i class="fas fa-tachometer-alt w-5 text-center"></i>
+                                <span class="ml-2">Dashboard</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="hotels.html" class="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                                <i class="fas fa-hotel w-5 text-center"></i>
+                                <span class="ml-2">Hotels</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                                <i class="fas fa-users w-5 text-center"></i>
+                                <span class="ml-2">Users</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="bookings.html" class="flex items-center px-3 py-2 text-blue-600 bg-blue-50 rounded-md">
+                                <i class="fas fa-calendar-alt w-5 text-center"></i>
+                                <span class="ml-2">Bookings</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="mb-6">
+                    <h3 class="text-xs uppercase text-gray-500 font-semibold tracking-wider">Analytics</h3>
+                    <ul class="mt-3 space-y-1">
+                        <li>
+                            <a href="#" class="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                                <i class="fas fa-chart-line w-5 text-center"></i>
+                                <span class="ml-2">Reports</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                                <i class="fas fa-money-bill-wave w-5 text-center"></i>
+                                <span class="ml-2">Revenue</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                                <i class="fas fa-chart-pie w-5 text-center"></i>
+                                <span class="ml-2">Statistics</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="mb-6">
+                    <h3 class="text-xs uppercase text-gray-500 font-semibold tracking-wider">Administration</h3>
+                    <ul class="mt-3 space-y-1">
+                        <li>
+                            <a href="#" class="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                                <i class="fas fa-user-shield w-5 text-center"></i>
+                                <span class="ml-2">Admin Users</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                                <i class="fas fa-cog w-5 text-center"></i>
+                                <span class="ml-2">Settings</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                                <i class="fas fa-bell w-5 text-center"></i>
+                                <span class="ml-2">Notifications</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-xs uppercase text-gray-500 font-semibold tracking-wider">Support</h3>
+                    <ul class="mt-3 space-y-1">
+                        <li>
+                            <a href="#" class="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                                <i class="fas fa-question-circle w-5 text-center"></i>
+                                <span class="ml-2">Help Center</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="flex items-center px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md">
+                                <i class="fas fa-headset w-5 text-center"></i>
+                                <span class="ml-2">Contact Support</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6">
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800">Bookings Management</h1>
+                    <p class="text-gray-600">Manage all bookings across your hotel network</p>
+                </div>
+                <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200 flex items-center">
+                    <i class="fas fa-plus mr-2"></i> Create New Booking
+                </button>
+            </div>
+            
+            <!-- Filters Section -->
+            <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+                <div class="flex flex-wrap items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4 md:mb-0">Filter Bookings</h3>
+                    
+                    <div class="flex flex-wrap gap-4">
+                        <div class="w-full md:w-auto">
+                            <label for="hotel-filter" class="block text-sm font-medium text-gray-700 mb-1">Hotel</label>
+                            <select id="hotel-filter" class="w-full md:w-48 px-3 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                                <option value="all">All Hotels</option>
+                                <option value="grand-paris">Grand Hotel Paris</option>
+                                <option value="plaza-london">Plaza London</option>
+                                <option value="manhattan-suites">Manhattan Suites</option>
+                                <option value="tokyo-luxury">Tokyo Luxury Hotel</option>
+                                <option value="dubai-palace">Dubai Palace</option>
+                            </select>
+                        </div>
+                        
+                        <div class="w-full md:w-auto">
+                            <label for="status-filter" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                            <select id="status-filter" class="w-full md:w-48 px-3 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                                <option value="all">All Status</option>
+                                <option value="confirmed">Confirmed</option>
+                                <option value="pending">Pending</option>
+                                <option value="cancelled">Cancelled</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+                        
+                        <div class="w-full md:w-auto">
+                            <label for="date-filter" class="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
+                            <select id="date-filter" class="w-full md:w-48 px-3 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                                <option value="all">All Dates</option>
+                                <option value="today">Today</option>
+                                <option value="tomorrow">Tomorrow</option>
+                                <option value="this-week">This Week</option>
+                                <option value="next-week">Next Week</option>
+                                <option value="this-month">This Month</option>
+                                <option value="custom">Custom Range</option>
+                            </select>
+                        </div>
+                        
+                        <div class="w-full md:w-auto flex items-end">
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                                <i class="fas fa-filter mr-1"></i> Apply Filters
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Bookings Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-gray-500 text-sm font-medium">Total Bookings</h3>
+                        <div class="bg-blue-100 p-2 rounded-md">
+                            <i class="fas fa-calendar-check text-blue-600"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-end">
+                        <p class="text-2xl font-bold text-gray-800">1,248</p>
+                        <p class="text-green-600 text-sm ml-2 mb-1">
+                            <i class="fas fa-arrow-up mr-1"></i>8%
+                        </p>
+                    </div>
+                    <p class="text-gray-500 text-sm mt-1">Compared to last month</p>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-gray-500 text-sm font-medium">Confirmed</h3>
+                        <div class="bg-green-100 p-2 rounded-md">
+                            <i class="fas fa-check-circle text-green-600"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-end">
+                        <p class="text-2xl font-bold text-gray-800">842</p>
+                        <p class="text-green-600 text-sm ml-2 mb-1">
+                            <i class="fas fa-arrow-up mr-1"></i>12%
+                        </p>
+                    </div>
+                    <p class="text-gray-500 text-sm mt-1">Compared to last month</p>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-gray-500 text-sm font-medium">Pending</h3>
+                        <div class="bg-yellow-100 p-2 rounded-md">
+                            <i class="fas fa-clock text-yellow-600"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-end">
+                        <p class="text-2xl font-bold text-gray-800">156</p>
+                        <p class="text-red-600 text-sm ml-2 mb-1">
+                            <i class="fas fa-arrow-down mr-1"></i>3%
+                        </p>
+                    </div>
+                    <p class="text-gray-500 text-sm mt-1">Compared to last month</p>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-gray-500 text-sm font-medium">Cancelled</h3>
+                        <div class="bg-red-100 p-2 rounded-md">
+                            <i class="fas fa-times-circle text-red-600"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-end">
+                        <p class="text-2xl font-bold text-gray-800">42</p>
+                        <p class="text-green-600 text-sm ml-2 mb-1">
+                            <i class="fas fa-arrow-down mr-1"></i>5%
+                        </p>
+                    </div>
+                    <p class="text-gray-500 text-sm mt-1">Compared to last month</p>
+                </div>
+            </div>
+            
+            <!-- Bookings Table -->
+            <div class="bg-white rounded-lg shadow-sm overflow-hidden mb-8">
+                <div class="p-6 border-b">
+                    <h3 class="text-lg font-semibold text-gray-800">Recent Bookings</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Booking ID
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Guest
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Hotel
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Check In/Out
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Room Type
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Amount
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Status
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <!-- Booking 1 -->
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">BK-10045</div>
+                                    <div class="text-xs text-gray-500">May 15, 2023</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="h-8 w-8 flex-shrink-0">
+                                            <img class="h-8 w-8 rounded-full object-cover" src="https://randomuser.me/api/portraits/men/32.jpg" alt="">
+                                        </div>
+                                        <div class="ml-3">
+                                            <div class="text-sm font-medium text-gray-900">John Smith</div>
+                                            <div class="text-sm text-gray-500">john.smith@example.com</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">Grand Hotel Paris</div>
+                                    <div class="text-xs text-gray-500">Paris, France</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">Jun 12 - Jun 15, 2023</div>
+                                    <div class="text-xs text-gray-500">3 nights</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">Deluxe Suite</div>
+                                    <div class="text-xs text-gray-500">2 Adults, 1 Child</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">€1,250</div>
+                                    <div class="text-xs text-gray-500">Paid</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="status-badge status-confirmed">Confirmed</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <div class="flex justify-end space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="text-gray-600 hover:text-gray-800">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="text-red-600 hover:text-red-800">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Booking 2 -->
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">BK-10044</div>
+                                    <div class="text-xs text-gray-500">May 14, 2023</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="h-8 w-8 flex-shrink-0">
+                                            <img class="h-8 w-8 rounded-full object-cover" src="https://randomuser.me/api/portraits/women/45.jpg" alt="">
+                                        </div>
+                                        <div class="ml-3">
+                                            <div class="text-sm font-medium text-gray-900">Sarah Williams</div>
+                                            <div class="text-sm text-gray-500">sarah.w@example.com</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">Plaza London</div>
+                                    <div class="text-xs text-gray-500">London, UK</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">June 5 - June 10, 2023</div>
+                                    <div class="text-xs text-gray-500">5 nights</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">Standard Room</div>
+                                    <div class="text-xs text-gray-500">1 room, 1 adult</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">£890</div>
+                                    <div class="text-xs text-gray-500">Pending</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="status-badge status-pending">Pending</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <div class="flex justify-end space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="text-gray-600 hover:text-gray-800">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="text-red-600 hover:text-red-800">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Booking 3 -->
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">BK-10043</div>
+                                    <div class="text-xs text-gray-500">May 14, 2023</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="h-8 w-8 flex-shrink-0">
+                                            <img class="h-8 w-8 rounded-full object-cover" src="https://randomuser.me/api/portraits/men/67.jpg" alt="">
+                                        </div>
+                                        <div class="ml-3">
+                                            <div class="text-sm font-medium text-gray-900">Robert Chen</div>
+                                            <div class="text-sm text-gray-500">robert.c@example.com</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">Tokyo Luxury Hotel</div>
+                                    <div class="text-xs text-gray-500">Tokyo, Japan</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">May 10 - May 15, 2023</div>
+                                    <div class="text-xs text-gray-500">5 nights</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">Executive Suite</div>
+                                    <div class="text-xs text-gray-500">1 room, 2 adults</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">¥175,000</div>
+                                    <div class="text-xs text-gray-500">Paid</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="status-badge status-completed">Completed</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <div class="flex justify-end space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="text-gray-600 hover:text-gray-800">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="text-red-600 hover:text-red-800">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Booking 4 -->
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">BK-10042</div>
+                                    <div class="text-xs text-gray-500">May 13, 2023</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="h-8 w-8 flex-shrink-0">
+                                            <img class="h-8 w-8 rounded-full object-cover" src="https://randomuser.me/api/portraits/women/22.jpg" alt="">
+                                        </div>
+                                        <div class="ml-3">
+                                            <div class="text-sm font-medium text-gray-900">Emma Davis</div>
+                                            <div class="text-sm text-gray-500">emma.d@example.com</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">Dubai Palace</div>
+                                    <div class="text-xs text-gray-500">Dubai, UAE</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">May 25 - May 30, 2023</div>
+                                    <div class="text-xs text-gray-500">5 nights</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">Royal Suite</div>
+                                    <div class="text-xs text-gray-500">1 room, 2 adults, 1 child</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">AED 8,500</div>
+                                    <div class="text-xs text-gray-500">Paid</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="status-badge status-cancelled">Cancelled</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <div class="flex justify-end space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="text-gray-600 hover:text-gray-800">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="text-red-600 hover:text-red-800">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Booking 5 -->
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">BK-10041</div>
+                                    <div class="text-xs text-gray-500">May 12, 2023</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="h-8 w-8 flex-shrink-0">
+                                            <img class="h-8 w-8 rounded-full object-cover" src="https://randomuser.me/api/portraits/men/42.jpg" alt="">
+                                        </div>
+                                        <div class="ml-3">
+                                            <div class="text-sm font-medium text-gray-900">James Wilson</div>
+                                            <div class="text-sm text-gray-500">james.w@example.com</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">Manhattan Suites</div>
+                                    <div class="text-xs text-gray-500">New York, USA</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">June 15 - June 20, 2023</div>
+                                    <div class="text-xs text-gray-500">5 nights</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900">Penthouse</div>
+                                    <div class="text-xs text-gray-500">1 room, 2 adults</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">$2,800.00</div>
+                                    <div class="text-xs text-gray-500">Paid</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="status-badge status-confirmed">Confirmed</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <div class="flex justify-end space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="text-gray-600 hover:text-gray-800">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="text-red-600 hover:text-red-800">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="px-6 py-4 border-t">
+                    <div class="flex items-center justify-between">
+                        <div class="text-sm text-gray-600">
+                            Showing <span class="font-medium">1</span> to <span class="font-medium">5</span> of <span class="font-medium">1,248</span> bookings
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="px-3 py-1 border rounded-md text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50" disabled>
+                                Previous
+                            </button>
+                            <button class="px-3 py-1 border rounded-md bg-blue-50 text-blue-600 text-sm font-medium">
+                                1
+                            </button>
+                            <button class="px-3 py-1 border rounded-md text-sm text-gray-600 hover:bg-gray-50">
+                                2
+                            </button>
+                            <button class="px-3 py-1 border rounded-md text-sm text-gray-600 hover:bg-gray-50">
+                                3
+                            </button>
+                            <button class="px-3 py-1 border rounded-md text-sm text-gray-600 hover:bg-gray-50">
+                                ...
+                            </button>
+                            <button class="px-3 py-1 border rounded-md text-sm text-gray-600 hover:bg-gray-50">
+                                250
+                            </button>
+                            <button class="px-3 py-1 border rounded-md text-sm text-gray-600 hover:bg-gray-50">
+                                Next
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Booking Trends Chart -->
+            <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800">Booking Trends</h3>
+                    <div>
+                        <select class="px-3 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                            <option value="last-7-days">Last 7 Days</option>
+                            <option value="last-30-days">Last 30 Days</option>
+                            <option value="last-90-days">Last 90 Days</option>
+                            <option value="year-to-date">Year to Date</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <canvas id="bookingTrendsChart" height="300"></canvas>
+                </div>
+            </div>
+            
+            <!-- Recent Activities -->
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800">Recent Activities</h3>
+                    <a href="#" class="text-blue-600 hover:text-blue-800 text-sm font-medium">View All</a>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-calendar-plus text-blue-600"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-900">New booking created</p>
+                            <p class="text-sm text-gray-500">Michael Johnson booked a Deluxe Suite at Grand Hotel Paris</p>
+                            <p class="text-xs text-gray-400 mt-1">10 minutes ago</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-check-circle text-green-600"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-900">Booking confirmed</p>
+                            <p class="text-sm text-gray-500">James Wilson's booking at Manhattan Suites has been confirmed</p>
+                            <p class="text-xs text-gray-400 mt-1">25 minutes ago</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-times-circle text-red-600"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-900">Booking cancelled</p>
+                            <p class="text-sm text-gray-500">Emma Davis cancelled her booking at Dubai Palace</p>
+                            <p class="text-xs text-gray-400 mt-1">1 hour ago</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-edit text-purple-600"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-900">Booking modified</p>
+                            <p class="text-sm text-gray-500">Sarah Williams changed her check-in date at Plaza London</p>
+                            <p class="text-xs text-gray-400 mt-1">2 hours ago</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start">
+                        <div class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-comment-alt text-indigo-600"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-900">New comment added</p>
+                            <p class="text-sm text-gray-500">Admin added a note to Robert Chen's booking</p>
+                            <p class="text-xs text-gray-400 mt-1">3 hours ago</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Sidebar Toggle
+        document.getElementById('sidebar-toggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('open');
+        });
+        
+        // Initialize Booking Trends Chart
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('bookingTrendsChart').getContext('2d');
+            
+            const bookingTrendsChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['May 10', 'May 11', 'May 12', 'May 13', 'May 14', 'May 15', 'May 16'],
+                    datasets: [
+                        {
+                            label: 'New Bookings',
+                            data: [25, 30, 35, 28, 32, 42, 38],
+                            borderColor: '#3B82F6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Cancellations',
+                            data: [5, 7, 4, 6, 8, 3, 5],
+                            borderColor: '#EF4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                drawBorder: false
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

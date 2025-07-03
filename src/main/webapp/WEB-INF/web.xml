@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
+   version="6.0">
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
+    <session-config>
+        <session-timeout>
+            30
+        </session-timeout>
+    </session-config>
+    <servlet>
+        <servlet-name>AddHotelJsp</servlet-name>
+        <jsp-file>/Manager/add-hotel.jsp</jsp-file>
+        <multipart-config>
+            <max-file-size>10485760</max-file-size>        <!-- 10 MB -->
+            <max-request-size>20971520</max-request-size>  <!-- 20 MB -->
+            <file-size-threshold>0</file-size-threshold>
+        </multipart-config>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>AddHotelJsp</servlet-name>
+        <url-pattern>/Manager/add-hotel.jsp</url-pattern>
+    </servlet-mapping>
+</web-app>

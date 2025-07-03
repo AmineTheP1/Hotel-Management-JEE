@@ -1,0 +1,30 @@
+# Maven build output
+/target/
+**/target/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# NetBeans
+nb-configuration.xml
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# VS Code
+.vscode/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Other
+bash.exe.stackdump
+[Help
+mvn 
