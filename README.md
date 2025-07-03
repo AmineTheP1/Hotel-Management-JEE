@@ -12,9 +12,7 @@ This is a Java EE (JEE) multi-module project for hotel management, built using M
 
 ![Hotels](https://github.com/user-attachments/assets/44a3569b-c4df-4eb4-96f6-3b7b2a058863)
 
-![Singup Hotel Manager](https://github.com/user-attachments/assets/0bfc841a-8457-4ecf-9c58-ba6119c46451)
-
-![Login Hotel Manager](https://github.com/user-attachments/assets/c8535d0b-a592-4ce4-a1e9-ed6025a86a61)
+![Sign up Hotel Manager](https://github.com/user-attachments/assets/e54fe5bb-2f54-4db4-b4e6-b818a292097b)
 
 ![Dashboard Manager](https://github.com/user-attachments/assets/18b39958-f5b6-4345-bad0-8948a77af8bc)
 
